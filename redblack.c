@@ -41,11 +41,22 @@ void print_tree(struct nodo *no) {
 }
 
 int main() {
-	struct nodo *raiz = cria_nodo(NULL, 10);
-	inserir(NULL, raiz, 7);
-	inserir(NULL, raiz, 11);
-	inserir(NULL, raiz, 6);
-	inserir(NULL, raiz, 8);
+	int booleano_raiz = 1;
+	struct nodo *raiz;
+	while (1) {
+		char escolha;
+		int chave;
+		scanf(" %c %d", &escolha, &chave);
+		if (escolha != 'i')
+			break;
+		if (booleano_raiz) {
+			raiz = cria_nodo(NULL, chave);
+			booleano_raiz = 0;
+		}
+		else {
+			inserir(NULL, raiz, chave);
+		}
+	}
 	print_tree(raiz);
 	printf("\n");
 }

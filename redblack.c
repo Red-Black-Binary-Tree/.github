@@ -44,6 +44,47 @@ void print_tree(struct nodo *no) {
 	print_tree(no->dir);
 }
 
+
+void rotacao_esquerda(struct nodo **raiz, struct nodo *x){
+	struct nodo *y = x->dir;
+	x->dir = y->esq;
+	if(y->esq != NULL){
+		y->esq->pai = x;
+	}
+	y->pai = x->pai;
+	if(x->pai == NULL){
+		*raiz = y;
+	}
+	else if (x == x->pai->esq){
+		x->pai->esq = y;
+	}
+	else{
+		x->pai->dir = y;
+	}
+	y->esq = x;
+	x->pai = y;
+}
+
+void rotacao_direita(struct nodo **raiz, struct nodo *y){
+	struct nodo *x = y->esq;
+	y->esq = x->dir;
+	if(x->dir != NULL){
+		x->dir->pai = y;
+	}
+	x->pai = y->pai;
+	if(y->pai == NULL){
+		*raiz = x;
+	}
+	else if(y == y->pai->esq){
+		y->pai->esq = x;
+	}
+	else{
+		y->pai->dir = x;
+	}
+	x->dir = y;
+	y->pai = x;
+}
+
 int altura(struct nodo *raiz) {
 	if (raiz == NULL) return 0;
 	int h_esq = altura(raiz->esq);

@@ -11,11 +11,15 @@ struct nodo *cria_nodo(struct nodo *pai, int chave) {
 	n->chave = chave;
 	n->esq = NULL;
 	n->dir = NULL;
-	//Se o nó que foi passado é NULL = Não tem pai:
-	if (pai == NULL)
+	n->nivel = 0;
+	//Se o nó que foi passado é NULL = Não tem pai, ou seja, "n" é a raiz:
+	if (pai == NULL) {
 		n->pai = NULL;
+		n->cor = 0;
+	}
 	//Se não for NULL = Juntar pai e filho:
 	else {
+		n->cor = 1;
 		n->pai = pai;
 		if (pai->chave > n->chave)
 			pai->esq = n;
@@ -40,7 +44,7 @@ void print_tree(struct nodo *no) {
 	if (no == NULL)
 		return;
 	print_tree(no->esq);
-	printf("%.d ", no->chave);
+	printf("(%.d, %d, %d)", no->chave, no->nivel, no->cor);
 	print_tree(no->dir);
 }
 

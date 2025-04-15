@@ -130,6 +130,31 @@ void print_arvore_vertical(struct nodo *raiz) {
 	}
 }
 
+struct nodo *antecessor(struct nodo *no_esquerdo) {
+	//se ele não tiver nó à esquerda, ele não tem antecessor.
+	if (no_esquerdo == NULL)
+		return NULL;
+	else {
+		if (no_esquerdo->dir != NULL)
+			antecessor(no_esquerdo->dir);
+		else
+			return no_esquerdo;
+	}
+}
+
+struct nodo *sucessor(struct nodo *no_direito) {
+	//se ele não tiver nó à direita, ele não tem sucessor.
+	if (no_direito == NULL)
+		return NULL;
+	else {
+		if (no_direito->esq != NULL)
+			antecessor(no_direito->esq);
+		else
+			return no_direito;
+	}
+}
+
+
 int main() {
 	int booleano_raiz = 1;
 	struct nodo *raiz;
@@ -151,4 +176,11 @@ int main() {
 	printf("\nVisual (pra baixo):\n");
 	print_arvore_vertical(raiz);
 	printf("\n");
+	//conferir se raiz->esq != NULL (se for, não tem antecessor).
+	struct nodo *antecessor_raiz = antecessor(raiz->esq);
+	//conferir se raiz->dir != NULL (se for, não tem sucessor).
+	struct nodo *sucessor_raiz = sucessor(raiz->dir);
+	printf("antecessor da raiz: %d\n", antecessor_raiz->chave);
+	printf("sucessor da raiz: %d\n", sucessor_raiz->chave);
 }
+

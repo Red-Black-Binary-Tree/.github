@@ -11,7 +11,9 @@ struct nodo {
 	int nivel;
 };
 
-
+struct arvore{
+	struct nodo *raiz;
+};
 
 
 #endif

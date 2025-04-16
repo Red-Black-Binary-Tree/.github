@@ -49,7 +49,7 @@ void print_tree(struct nodo *no) {
 }
 
 
-void rotacao_esquerda(struct nodo **raiz, struct nodo *x){
+void rotacao_esquerda(struct arvore *t, struct nodo *x){
 	struct nodo *y = x->dir;
 	x->dir = y->esq;
 	if(y->esq != NULL){
@@ -57,7 +57,7 @@ void rotacao_esquerda(struct nodo **raiz, struct nodo *x){
 	}
 	y->pai = x->pai;
 	if(x->pai == NULL){
-		*raiz = y;
+		t->raiz = y;
 	}
 	else if (x == x->pai->esq){
 		x->pai->esq = y;
@@ -69,7 +69,7 @@ void rotacao_esquerda(struct nodo **raiz, struct nodo *x){
 	x->pai = y;
 }
 
-void rotacao_direita(struct nodo **raiz, struct nodo *y){
+void rotacao_direita(struct arvore *t, struct nodo *y){
 	struct nodo *x = y->esq;
 	y->esq = x->dir;
 	if(x->dir != NULL){
@@ -77,7 +77,7 @@ void rotacao_direita(struct nodo **raiz, struct nodo *y){
 	}
 	x->pai = y->pai;
 	if(y->pai == NULL){
-		*raiz = x;
+		t->raiz = x;
 	}
 	else if(y == y->pai->esq){
 		y->pai->esq = x;
@@ -140,7 +140,7 @@ struct nodo *antecessor(struct nodo *no_esquerdo) {
 		return NULL;
 	else {
 		if (no_esquerdo->dir != NULL)
-			antecessor(no_esquerdo->dir);
+			return antecessor(no_esquerdo->dir);
 		else
 			return no_esquerdo;
 	}
@@ -152,7 +152,7 @@ struct nodo *sucessor(struct nodo *no_direito) {
 		return NULL;
 	else {
 		if (no_direito->esq != NULL)
-			antecessor(no_direito->esq);
+			return sucessor(no_direito->esq);
 		else
 			return no_direito;
 	}
@@ -161,7 +161,8 @@ struct nodo *sucessor(struct nodo *no_direito) {
 
 int main() {
 	int booleano_raiz = 1;
-	struct nodo *raiz;
+	struct arvore *t;
+	t = malloc(sizeof(struct arvore));
 	while (1) {
 		char escolha;
 		int chave;
@@ -169,22 +170,35 @@ int main() {
 		if (escolha != 'i')
 			break;
 		if (booleano_raiz) {
-			raiz = cria_nodo(NULL, chave);
+			t->raiz = cria_nodo(NULL, chave);
 			booleano_raiz = 0;
 		}
 		else {
-			inserir(NULL, raiz, chave);
+			inserir(NULL, t->raiz, chave);
 		}
 	}
-	print_tree(raiz);
+	print_tree(t->raiz);
 	printf("\nVisual (pra baixo):\n");
-	print_arvore_vertical(raiz);
+	print_arvore_vertical(t->raiz);
 	printf("\n");
 	//conferir se raiz->esq != NULL (se for, não tem antecessor).
-	struct nodo *antecessor_raiz = antecessor(raiz->esq);
+	struct nodo *antecessor_raiz = antecessor(t->raiz->esq);
 	//conferir se raiz->dir != NULL (se for, não tem sucessor).
-	struct nodo *sucessor_raiz = sucessor(raiz->dir);
-	printf("antecessor da raiz: %d\n", antecessor_raiz->chave);
-	printf("sucessor da raiz: %d\n", sucessor_raiz->chave);
+	struct nodo *sucessor_raiz = sucessor(t->raiz->dir);
+	if (antecessor_raiz != NULL){ 
+		printf("antecessor da raiz: %d\n", antecessor_raiz->chave);
+	}
+	else{ 
+		printf("antecessor da raiz: NULO\n");
+	}
+	if (sucessor_raiz != NULL){
+		printf("sucessor da raiz: %d\n", sucessor_raiz->chave);
+	}
+	
+	else{
+		printf("sucessor da raiz: NULO\n");
+	}
+
+	rotacao_esquerda(t, t->raiz);
 }
 

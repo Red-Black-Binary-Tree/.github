@@ -6,6 +6,8 @@
 #define MAX_LINHAS 100
 #define MAX_COLUNAS 255
 
+//----------------------------------------------------------------------------------------------//
+//Área de criação de nodo.
 struct nodo *cria_nodo(struct nodo *pai, int chave) {
 	struct nodo *n = malloc(sizeof(struct nodo));
 	n->chave = chave;
@@ -29,26 +31,33 @@ struct nodo *cria_nodo(struct nodo *pai, int chave) {
 	return n;
 }
 
-struct nodo *inserir(struct nodo *pai, struct nodo *no, int chave) {
-	if (no == NULL)
-		return cria_nodo(pai, chave);
-	if (no->chave > chave)
-		return inserir(no, no->esq, chave);
-	// AINDA NÃO DEFINI QUAL LADO VAI SE FOR IGUAL!!!
-	if (no->chave < chave)
-		return inserir(no, no->dir, chave);
-	return NULL;
+//----------------------------------------------------------------------------------------------//
+//Área destinada a achar o antecessor e sucessor.
+struct nodo *antecessor(struct nodo *no_esquerdo) {
+	//se ele não tiver nó à esquerda, ele não tem antecessor.
+	if (no_esquerdo == NULL)
+		return NULL;
+	else {
+		if (no_esquerdo->dir != NULL)
+			return antecessor(no_esquerdo->dir);
+		else
+			return no_esquerdo;
+	}
 }
 
-void print_tree(struct nodo *no) {
-	if (no == NULL)
-		return;
-	print_tree(no->esq);
-	printf("(%.d, %d, %d)", no->chave, no->nivel, no->cor);
-	print_tree(no->dir);
+struct nodo *sucessor(struct nodo *no_direito) {
+	//se ele não tiver nó à direita, ele não tem sucessor.
+	if (no_direito == NULL)
+		return NULL;
+	else {
+		if (no_direito->esq != NULL)
+			return sucessor(no_direito->esq);
+		else
+			return no_direito;
+	}
 }
-
-
+//----------------------------------------------------------------------------------------------//
+//Área destinada às rotações.
 void rotacao_esquerda(struct arvore *t, struct nodo *x){
 	struct nodo *y = x->dir;
 	x->dir = y->esq;
@@ -89,6 +98,115 @@ void rotacao_direita(struct arvore *t, struct nodo *y){
 	y->pai = x;
 }
 
+//----------------------------------------------------------------------------------------------//
+//Área destinada a inserção.
+void confere_rb(struct arvore *t, struct nodo *z) {
+	while (z->pai != NULL && z->pai->cor == 1) {
+		//se o pai de z é o filho da esquerda do avô de z.
+		if (z->pai == z->pai->pai->esq) {
+			struct nodo *y = z->pai->pai->dir;
+			//Há um problema: se ele não tiver tio.
+			//Por isso, cria-se essa nova variável.
+			// Se ele não tiver tio, não acessa o NULL e não dá segmentation fault.
+			int cor_y;
+			if (y != NULL)
+				cor_y = y->cor;
+			else
+			 	cor_y = 0;
+			if (cor_y == 1) {
+				z->pai->cor = 0;
+				y->cor = 0;
+				z->pai->pai->cor = 1;
+				z = z->pai->pai;
+			}
+			else {
+				//se z é o filho da direita.
+				if (z == z->pai->dir) {
+					z = z->pai;
+					rotacao_esquerda(t, z);
+				}
+				z->pai->cor = 0;
+				z->pai->pai->cor = 1;
+				rotacao_direita(t, z->pai->pai);
+			}
+		}
+		//se o pai de z é o filho da direita do avô de z.
+		else {
+			struct nodo *y = z->pai->pai->esq;
+			int cor_y;
+			if (y != NULL)
+				cor_y = y->cor;
+			else
+			 	cor_y = 0;
+
+			if (cor_y == 1) {
+				z->pai->cor = 0;
+				y->cor = 0;
+				z->pai->pai->cor = 1;
+				z = z->pai->pai;
+			}
+			else {
+				if (z == z->pai->esq) {
+					z = z->pai;
+					rotacao_direita(t, z);
+				}
+				z->pai->cor = 0;
+				z->pai->pai->cor = 1;
+				rotacao_esquerda(t, z->pai->pai);
+			}
+		}
+	}
+	t->raiz->cor = 0;
+}
+
+void rb_insert(struct arvore *t, struct nodo *z ) {
+	struct nodo *y = NULL;
+	struct nodo *x = t->raiz;
+	while (x != NULL) {
+		y = x;
+		if (z->chave < x->chave)
+			x = x->esq;
+		else
+			x = x->dir;
+	}
+	z->pai = y;
+	if (y == NULL)
+		t->raiz = z;
+	else if (z->chave < y->chave)
+		y->esq = z;
+	else
+		y->dir = z;
+	//chamar o cria_nodo() depois...
+	z->esq = NULL;
+	z->dir = NULL;
+	z->cor = 1;
+	if (z != t->raiz)
+		confere_rb(t, z);
+	else
+		z->cor = 0;
+}
+
+//----------------------------------------------------------------------------------------------//
+//Área destinada a nivelação.
+void nivelacao(struct nodo *no, int nivel) {
+	if (no == NULL)
+		return;
+
+	no->nivel = nivel;
+
+	nivelacao(no->esq, nivel+1);
+	nivelacao(no->dir, nivel+1);
+}
+//----------------------------------------------------------------------------------------------//
+// Área destinada ao print.
+void print_tree(struct nodo *no) {
+	if (no == NULL)
+		return;
+	print_tree(no->esq);
+	printf("(%.d, %d, %d)\n", no->chave, no->nivel, no->cor);
+	print_tree(no->dir);
+}
+
 int altura(struct nodo *raiz) {
 	if (raiz == NULL) return 0;
 	int h_esq = altura(raiz->esq);
@@ -96,12 +214,11 @@ int altura(struct nodo *raiz) {
 	return (h_esq > h_dir ? h_esq : h_dir) + 1;
 }
 
-
 void preenche_matriz(char tela[MAX_LINHAS][MAX_COLUNAS], struct nodo *raiz, int linha, int col, int espaco) {
 	if (raiz == NULL) return;
 
-	char buffer[10];
-	sprintf(buffer, "%d", raiz->chave);
+	char buffer[30];
+	sprintf(buffer, "(%d %d %d)", raiz->chave, raiz->nivel, raiz->cor);
 	int len = strlen(buffer);
 
 	for (int i = 0; i < len; i++)
@@ -133,34 +250,10 @@ void print_arvore_vertical(struct nodo *raiz) {
 		printf("%s\n", tela[i]);
 	}
 }
-
-struct nodo *antecessor(struct nodo *no_esquerdo) {
-	//se ele não tiver nó à esquerda, ele não tem antecessor.
-	if (no_esquerdo == NULL)
-		return NULL;
-	else {
-		if (no_esquerdo->dir != NULL)
-			return antecessor(no_esquerdo->dir);
-		else
-			return no_esquerdo;
-	}
-}
-
-struct nodo *sucessor(struct nodo *no_direito) {
-	//se ele não tiver nó à direita, ele não tem sucessor.
-	if (no_direito == NULL)
-		return NULL;
-	else {
-		if (no_direito->esq != NULL)
-			return sucessor(no_direito->esq);
-		else
-			return no_direito;
-	}
-}
-
+//----------------------------------------------------------------------------------------------//
 
 int main() {
-	int booleano_raiz = 1;
+	//int booleano_raiz = 1;
 	struct arvore *t;
 	t = malloc(sizeof(struct arvore));
 	while (1) {
@@ -169,15 +262,15 @@ int main() {
 		scanf(" %c %d", &escolha, &chave);
 		if (escolha != 'i')
 			break;
-		if (booleano_raiz) {
-			t->raiz = cria_nodo(NULL, chave);
-			booleano_raiz = 0;
-		}
-		else {
-			inserir(NULL, t->raiz, chave);
-		}
+
+		struct nodo *z = malloc(sizeof(struct nodo));
+		z->chave = chave;
+		rb_insert(t, z);
 	}
+	nivelacao(t->raiz, 0);
+	printf("\n");
 	print_tree(t->raiz);
+	printf("\n");
 	printf("\nVisual (pra baixo):\n");
 	print_arvore_vertical(t->raiz);
 	printf("\n");
@@ -198,7 +291,5 @@ int main() {
 	else{
 		printf("sucessor da raiz: NULO\n");
 	}
-
-	rotacao_esquerda(t, t->raiz);
 }
 

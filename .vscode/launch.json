@@ -9,7 +9,7 @@
       "stopAtEntry": false,
       "externalConsole": false,
       "cwd": "/home/toninhorf/Documentos/Red-Black_Project",
-      "program": "/home/toninhorf/Documentos/Red-Black_Project/build/Debug/redblack",
+      "program": "/home/toninhorf/Documentos/Red-Black_Project/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

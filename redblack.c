@@ -56,6 +56,20 @@ struct nodo *sucessor(struct nodo *no_direito) {
 			return no_direito;
 	}
 }
+
+struct nodo *tree_minimum(struct nodo *x){
+	while(x->esq != NULL){
+		x = x->esq;
+	}
+	return x;
+}
+
+struct nodo *tree_maximum(struct nodo *x){
+	while(x->dir != NULL){
+		x = x->dir;
+	}
+	return x;
+}
 //----------------------------------------------------------------------------------------------//
 //Área destinada às rotações.
 void rotacao_esquerda(struct arvore *t, struct nodo *x){
@@ -185,6 +199,88 @@ void rb_insert(struct arvore *t, struct nodo *z ) {
 	else
 		z->cor = 0;
 }
+//----------------------------------------------------------------------------------------------//
+//Área destinada a remoção
+
+void rb_transplante(struct arvore *t, struct nodo *u, struct nodo *v){
+	if(u->pai == NULL){
+		t->raiz = v;
+	}
+	else if(u == u->pai->esq){
+		u->pai->esq = v;
+	}
+	else{
+		u->pai->dir = v;
+	}
+	v->pai = u->pai;
+}
+
+void rb_delete_fixup(struct arvore *t, struct nodo *x){
+	struct nodo *w;
+	while(x != t->raiz && x->cor == 0){
+		if(x == x->pai->esq){
+			w = x->pai->dir;
+		}
+		if(w->cor == 1){
+			w->cor = 0;
+			x->pai->cor = 1;
+			rotacao_esquerda(t,x->pai);
+			w = x->pai->dir;
+		}
+		if(w->esq->cor == 0 && w->dir->cor == 0){
+			w->cor = 1;
+			x = x->pai;
+		}
+		else if(w->dir->cor == 0){
+			w->esq->cor = 0;
+			w->cor = 1;
+			rotacao_direita(t,w);
+			w = x->pai->dir;
+		}
+	}
+}
+
+
+
+
+void rb_delete(struct arvore *t, struct nodo *z){
+	struct nodo *x;
+	struct nodo *y = z;
+	int yCorOriginal = y->cor;
+	if(z->esq == NULL){
+		x = z->dir;
+		rb_transplante(t,z,z->dir);
+	}
+	else if(z->dir == NULL){
+		x = z->esq;
+		rb_transplante(t,z,z->esq);
+	}
+	else{ 
+		y = tree_minimum(z->dir);
+		yCorOriginal = y->cor;
+		x = y->dir;
+		if(y->pai == z){
+			x->pai = y;
+		}
+		else{
+			rb_transplante(t,y,y->dir);
+			y->dir = z->dir;
+			y->dir->pai = y;
+		}
+		rb_transplante(t,z,y);
+		y->esq = z->esq;
+		y->esq->pai = y;
+		y->cor = z->cor;
+	}
+	if(yCorOriginal == 0){
+		rb_delete_fixup(t,x);
+	}
+}
+
+
+
+
+
 
 //----------------------------------------------------------------------------------------------//
 //Área destinada a nivelação.
@@ -259,13 +355,18 @@ int main() {
 	while (1) {
 		char escolha;
 		int chave;
-		scanf(" %c %d", &escolha, &chave);
-		if (escolha != 'i')
-			break;
-
+		scanf("%c %d", &escolha, &chave);
 		struct nodo *z = malloc(sizeof(struct nodo));
 		z->chave = chave;
-		rb_insert(t, z);
+		if (escolha == 'i'){
+			rb_insert(t, z);
+		}
+		else if(escolha == 'r'){
+			rb_delete(t,z);
+		}
+		else{
+			break;
+		}
 	}
 	nivelacao(t->raiz, 0);
 	printf("\n");

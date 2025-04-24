@@ -202,7 +202,25 @@ void rb_insert(struct arvore *t, struct nodo *z ) {
 //----------------------------------------------------------------------------------------------//
 //Área destinada a remoção
 
+struct nodo *acha(struct nodo *n, int procurado) {
+    if (n == NULL) {
+        return NULL;
+    }
+    if (n->chave == procurado) {
+        return n;
+    }
+
+    struct nodo *resultado = acha(n->esq, procurado);
+    if (resultado != NULL) {
+        return resultado;
+    }
+
+    return acha(n->dir, procurado);
+}
+
 void rb_transplante(struct arvore *t, struct nodo *u, struct nodo *v){
+	if(u == NULL || v == NULL)
+		printf("vai dar seg fault em rb_transplante");
 	if(u->pai == NULL){
 		t->raiz = v;
 	}
@@ -212,7 +230,8 @@ void rb_transplante(struct arvore *t, struct nodo *u, struct nodo *v){
 	else{
 		u->pai->dir = v;
 	}
-	v->pai = u->pai;
+	if(v != NULL)
+		v->pai = u->pai;
 }
 
 void rb_delete_fixup(struct arvore *t, struct nodo *x){
@@ -240,13 +259,11 @@ void rb_delete_fixup(struct arvore *t, struct nodo *x){
 	}
 }
 
-
-
-
 void rb_delete(struct arvore *t, struct nodo *z){
 	struct nodo *x;
 	struct nodo *y = z;
 	int yCorOriginal = y->cor;
+
 	if(z->esq == NULL){
 		x = z->dir;
 		rb_transplante(t,z,z->dir);
@@ -256,23 +273,27 @@ void rb_delete(struct arvore *t, struct nodo *z){
 		rb_transplante(t,z,z->esq);
 	}
 	else{ 
-		y = tree_minimum(z->dir);
+		y = tree_maximum(z->esq);
 		yCorOriginal = y->cor;
-		x = y->dir;
+		x = y->esq;
 		if(y->pai == z){
-			x->pai = y;
+			if (x != NULL)
+				x->pai = y;
 		}
 		else{
-			rb_transplante(t,y,y->dir);
-			y->dir = z->dir;
-			y->dir->pai = y;
+			rb_transplante(t,y,y->esq);
+			y->esq = z->esq;
+			if (y->esq != NULL)
+				y->esq->pai = y;
 		}
+
 		rb_transplante(t,z,y);
-		y->esq = z->esq;
-		y->esq->pai = y;
+		y->dir = z->dir;
+		if (y->dir != NULL)
+			y->dir->pai = y;
 		y->cor = z->cor;
 	}
-	if(yCorOriginal == 0){
+	if(yCorOriginal == 0 && x != NULL){
 		rb_delete_fixup(t,x);
 	}
 }
@@ -352,19 +373,24 @@ int main() {
 	//int booleano_raiz = 1;
 	struct arvore *t;
 	t = malloc(sizeof(struct arvore));
+	t->raiz = NULL;
 	while (1) {
 		char escolha;
 		int chave;
-		scanf("%c %d", &escolha, &chave);
-		struct nodo *z = malloc(sizeof(struct nodo));
-		z->chave = chave;
+		scanf(" %c %d", &escolha, &chave);
 		if (escolha == 'i'){
+			struct nodo *z = malloc(sizeof(struct nodo));
+			z->chave = chave;
 			rb_insert(t, z);
 		}
 		else if(escolha == 'r'){
+			struct nodo *z = malloc(sizeof(struct nodo));
+			z = acha(t->raiz,chave);
+			printf("filho direita: %d\n", z->dir->chave);
 			rb_delete(t,z);
 		}
 		else{
+			rotacao_esquerda(t, t->raiz->dir);
 			break;
 		}
 	}

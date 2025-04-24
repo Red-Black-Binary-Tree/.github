@@ -115,63 +115,61 @@ void rotacao_direita(struct arvore *t, struct nodo *y){
 //----------------------------------------------------------------------------------------------//
 //Área destinada a inserção.
 void confere_rb(struct arvore *t, struct nodo *z) {
-	while (z->pai != NULL && z->pai->cor == 1) {
-		//se o pai de z é o filho da esquerda do avô de z.
-		if (z->pai == z->pai->pai->esq) {
-			struct nodo *y = z->pai->pai->dir;
-			//Há um problema: se ele não tiver tio.
-			//Por isso, cria-se essa nova variável.
-			// Se ele não tiver tio, não acessa o NULL e não dá segmentation fault.
-			int cor_y;
-			if (y != NULL)
-				cor_y = y->cor;
-			else
-			 	cor_y = 0;
-			if (cor_y == 1) {
-				z->pai->cor = 0;
-				y->cor = 0;
-				z->pai->pai->cor = 1;
-				z = z->pai->pai;
-			}
-			else {
-				//se z é o filho da direita.
-				if (z == z->pai->dir) {
-					z = z->pai;
-					rotacao_esquerda(t, z);
-				}
-				z->pai->cor = 0;
-				z->pai->pai->cor = 1;
-				rotacao_direita(t, z->pai->pai);
-			}
-		}
-		//se o pai de z é o filho da direita do avô de z.
-		else {
-			struct nodo *y = z->pai->pai->esq;
-			int cor_y;
-			if (y != NULL)
-				cor_y = y->cor;
-			else
-			 	cor_y = 0;
-
-			if (cor_y == 1) {
-				z->pai->cor = 0;
-				y->cor = 0;
-				z->pai->pai->cor = 1;
-				z = z->pai->pai;
-			}
-			else {
-				if (z == z->pai->esq) {
-					z = z->pai;
-					rotacao_direita(t, z);
-				}
-				z->pai->cor = 0;
-				z->pai->pai->cor = 1;
-				rotacao_esquerda(t, z->pai->pai);
-			}
-		}
-	}
-	t->raiz->cor = 0;
+    while (z->pai != NULL && z->pai->cor == 1) {
+        // Se o pai de z é o filho da esquerda do avô de z.
+        if (z->pai == z->pai->pai->esq) {
+            struct nodo *y = z->pai->pai->dir;
+            int cor_y;
+            if (y != NULL)
+                cor_y = y->cor;
+            else
+                cor_y = 0;
+            
+            if (cor_y == 1) {  // Caso em que tio é vermelho
+                // Caso de recoloração
+                z->pai->cor = 0;
+                y->cor = 0;
+                z->pai->pai->cor = 1;
+                z = z->pai->pai;  // Subir para o avô
+            } else {  // Caso em que tio é preto ou não existe
+                if (z == z->pai->dir) {  // Se z é o filho da direita
+                    z = z->pai;
+                    rotacao_esquerda(t, z);  // Realiza a rotação à esquerda
+                }
+                // Após rotação à esquerda, fazer a rotação à direita
+                z->pai->cor = 0;
+                z->pai->pai->cor = 1;
+                rotacao_direita(t, z->pai->pai);
+            }
+        } else {  // Se o pai de z é o filho da direita do avô de z.
+            struct nodo *y = z->pai->pai->esq;
+            int cor_y;
+            if (y != NULL)
+                cor_y = y->cor;
+            else
+                cor_y = 0;
+            
+            if (cor_y == 1) {  // Caso em que tio é vermelho
+                // Caso de recoloração
+                z->pai->cor = 0;
+                y->cor = 0;
+                z->pai->pai->cor = 1;
+                z = z->pai->pai;  // Subir para o avô
+            } else {  // Caso em que tio é preto ou não existe
+                if (z == z->pai->esq) {  // Se z é o filho da esquerda
+                    z = z->pai;
+                    rotacao_direita(t, z);  // Realiza a rotação à direita
+                }
+                // Após rotação à direita, fazer a rotação à esquerda
+                z->pai->cor = 0;
+                z->pai->pai->cor = 1;
+                rotacao_esquerda(t, z->pai->pai);
+            }
+        }
+    }
+    t->raiz->cor = 0;  // Garantir que a raiz sempre seja preta
 }
+
 
 void rb_insert(struct arvore *t, struct nodo *z ) {
 	struct nodo *y = NULL;
@@ -219,8 +217,6 @@ struct nodo *acha(struct nodo *n, int procurado) {
 }
 
 void rb_transplante(struct arvore *t, struct nodo *u, struct nodo *v){
-	if(u == NULL || v == NULL)
-		printf("vai dar seg fault em rb_transplante");
 	if(u->pai == NULL){
 		t->raiz = v;
 	}
@@ -263,7 +259,6 @@ void rb_delete(struct arvore *t, struct nodo *z){
 	struct nodo *x;
 	struct nodo *y = z;
 	int yCorOriginal = y->cor;
-
 	if(z->esq == NULL){
 		x = z->dir;
 		rb_transplante(t,z,z->dir);
@@ -379,18 +374,22 @@ int main() {
 		int chave;
 		scanf(" %c %d", &escolha, &chave);
 		if (escolha == 'i'){
-			struct nodo *z = malloc(sizeof(struct nodo));
-			z->chave = chave;
+			struct nodo *z = cria_nodo(NULL, chave);
 			rb_insert(t, z);
+			nivelacao(t->raiz, 0);
+			printf("\nVisual (pra baixo):\n");
+			print_arvore_vertical(t->raiz);
+			printf("\n");
 		}
 		else if(escolha == 'r'){
-			struct nodo *z = malloc(sizeof(struct nodo));
-			z = acha(t->raiz,chave);
-			printf("filho direita: %d\n", z->dir->chave);
-			rb_delete(t,z);
+			struct nodo *z = acha(t->raiz, chave);
+			if (z != NULL) {
+				rb_delete(t, z);
+			} else {
+				printf("Nó %d não encontrado para remoção!\n", chave);
+			}
 		}
 		else{
-			rotacao_esquerda(t, t->raiz->dir);
 			break;
 		}
 	}
@@ -419,4 +418,3 @@ int main() {
 		printf("sucessor da raiz: NULO\n");
 	}
 }
-

@@ -327,111 +327,11 @@ void nivelacao(struct nodo *no, int nivel) {
 
 //----------------------------------------------------------------------------------------------//
 // Área destinada ao print.
+
 void print_tree(struct nodo *no) {
     if (no == NIL)
         return;
     print_tree(no->esq);
     printf("(%d, %d, %d)\n", no->chave, no->nivel, no->cor);
     print_tree(no->dir);
-}
-
-int altura(struct nodo *raiz) {
-	if (raiz == NIL) return 0;
-	int h_esq = altura(raiz->esq);
-	int h_dir = altura(raiz->dir);
-	return (h_esq > h_dir ? h_esq : h_dir) + 1;
-}
-
-void preenche_matriz(char tela[MAX_LINHAS][MAX_COLUNAS], struct nodo *raiz, int linha, int col, int espaco) {
-	if (raiz == NIL) return;
-
-	char buffer[30];
-	sprintf(buffer, "(%d %d %d)", raiz->chave, raiz->nivel, raiz->cor);
-	int len = strlen(buffer);
-
-	for (int i = 0; i < len; i++)
-		tela[linha][col + i] = buffer[i];
-
-	if (raiz->esq != NIL) {
-		tela[linha + 1][col - 1] = '/';
-		preenche_matriz(tela, raiz->esq, linha + 2, col - espaco, espaco / 2);
-	}
-	if (raiz->dir != NIL) {
-		tela[linha + 1][col + len] = '\\';
-		preenche_matriz(tela, raiz->dir, linha + 2, col + espaco, espaco / 2);
-	}
-}
-
-
-void print_arvore_vertical(struct nodo *raiz) {
-	char tela[MAX_LINHAS][MAX_COLUNAS];
-	for (int i = 0; i < MAX_LINHAS; i++)
-		for (int j = 0; j < MAX_COLUNAS; j++)
-			tela[i][j] = ' ';
-
-	int h = altura(raiz);
-	int largura = 64;  
-	preenche_matriz(tela, raiz, 0, largura / 2, largura / 4);
-
-	for (int i = 0; i < h * 2; i++) {
-		tela[i][MAX_COLUNAS - 1] = '\0';
-		printf("%s\n", tela[i]);
-	}
-}
-//----------------------------------------------------------------------------------------------//
-
-int main() {
-	initNIL();
-	struct arvore *t;
-	t = malloc(sizeof(struct arvore));
-	t->raiz = NIL;
-	while (1) {
-		char escolha;
-		int chave;
-		scanf(" %c %d", &escolha, &chave);
-		if (escolha == 'i'){
-			struct nodo *z = cria_nodo(NIL, chave);
-			rb_insert(t, z);
-			nivelacao(t->raiz, 0);
-			printf("\nVisual (pra baixo):\n");
-			print_arvore_vertical(t->raiz);
-			printf("\n");
-		}
-		else if(escolha == 'r'){
-			struct nodo *z = acha(t->raiz, chave);
-			if (z != NIL) {
-				rb_delete(t, z);
-				nivelacao(t->raiz, 0);
-			} else {
-				printf("Nó %d não encontrado para remoção!\n", chave);
-			}
-		}
-		else{
-			break;
-		}
-	}
-	nivelacao(t->raiz, 0);
-	printf("\n");
-	print_tree(t->raiz);
-	printf("\n");
-	printf("\nVisual (pra baixo):\n");
-	print_arvore_vertical(t->raiz);
-	printf("\n");
-	//conferir se raiz->esq != NULL (se for, não tem antecessor).
-	struct nodo *antecessor_raiz = antecessor(t->raiz->esq);
-	//conferir se raiz->dir != NULL (se for, não tem sucessor).
-	struct nodo *sucessor_raiz = sucessor(t->raiz->dir);
-	if (antecessor_raiz != NIL){ 
-		printf("antecessor da raiz: %d\n", antecessor_raiz->chave);
-	}
-	else{ 
-		printf("antecessor da raiz: NULO\n");
-	}
-	if (sucessor_raiz != NIL){
-		printf("sucessor da raiz: %d\n", sucessor_raiz->chave);
-	}
-	
-	else{
-		printf("sucessor da raiz: NULO\n");
-	}
 }

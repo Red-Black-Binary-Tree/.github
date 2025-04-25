@@ -332,6 +332,7 @@ void print_tree(struct nodo *no) {
     if (no == NIL)
         return;
     print_tree(no->esq);
-    printf("(%d, %d, %d)\n", no->chave, no->nivel, no->cor);
+    printf("%d,%d,%d\n", no->chave, no->nivel, no->cor);
     print_tree(no->dir);
 }
+//----------------------------------------------------------------------------------------------//

@@ -1,0 +1,3 @@
+# Ignorando arquivos objeto e executáveis.
+*.o
+myrb

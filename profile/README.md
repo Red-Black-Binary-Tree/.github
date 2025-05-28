@@ -14,7 +14,7 @@
 
 
 <div align="center">
-  <img src="Assets/RedBlack_Logo.jpeg" alt="Logo RedBlack Tree" width="400px" />
+  <img src="RedBlack_Logo.jpeg" alt="Logo RedBlack Tree" width="400px" />
 </div>
 
 # Português:

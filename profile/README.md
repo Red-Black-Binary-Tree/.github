@@ -14,7 +14,7 @@
 
 
 <div align="center">
-  <img src="RedBlack_Logo.jpeg" alt="Logo RedBlack Tree" width="400px" />
+  <img src="Assets/Hashing_Logo.jpg" alt="Logo Hashing Project" width="400px" />
 </div>
 
 # Português:
